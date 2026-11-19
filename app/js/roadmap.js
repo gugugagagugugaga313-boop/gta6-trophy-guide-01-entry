@@ -14,13 +14,14 @@ export function renderRoadmap(stagesEl, titleEl, noteEl, roadmap, trophies, earn
     .map((stage) => {
       const stageTrophies = stage.trophyIds.map((id) => byId.get(id)).filter(Boolean);
       const done = stageTrophies.filter((t) => earned.has(t.id)).length;
+      const missableCount = stageTrophies.filter((t) => t.missable).length;
       const names = stageTrophies.map((t) => escapeHtml(t.name)).join(' · ');
-      return `<li class="roadmap-stage">
+      return `<li class="stage">
         <h3>Stage ${stage.stage} — ${escapeHtml(stage.name)}</h3>
-        <p class="stage-goal">${escapeHtml(stage.goal)}</p>
-        <p><span class="stage-count">${done} of ${stageTrophies.length} earned</span> — ${stageTrophies.filter((t) => t.missable).length} missable in this stage</p>
+        <p class="goal">${escapeHtml(stage.goal)}</p>
+        <p><span class="count">${done} of ${stageTrophies.length} earned</span> — ${missableCount} missable in this stage</p>
         <p>${escapeHtml(stage.advice)}</p>
-        <p class="stage-trophies">${names}</p>
+        <p class="stage-names">${names}</p>
       </li>`;
     })
     .join('');
@@ -32,11 +33,11 @@ export function renderMissables(listEl, ruleEl, trophies, missableRule) {
   const missable = trophies.filter((t) => t.missable);
   listEl.innerHTML = missable
     .map(
-      (t) => `<li class="trophy-row" data-id="${t.id}">
+      (t) => `<li class="row" data-id="${t.id}">
         <span></span>
-        <span><span class="trophy-name">${escapeHtml(t.name)}</span><br>
-        <span class="trophy-desc">${escapeHtml(t.description)}</span><br>
-        <span class="trophy-desc">${escapeHtml(t.guide)}</span></span>
+        <span><span class="row-name">${escapeHtml(t.name)}</span><br>
+        <span class="row-desc">${escapeHtml(t.description)}</span><br>
+        <span class="row-desc">${escapeHtml(t.guide)}</span></span>
         <span class="grade-mark grade-${t.grade}">${gradeLabel(t.grade)}</span>
       </li>`,
     )

@@ -6,9 +6,9 @@
 
 An offline guide and tracker for all **55 PlayStation 5 trophies** of Grand Theft Auto VI (1 platinum, 2 gold, 6 silver, 46 bronze), built for the [make.fun GTA 6 trophy guide competition](https://make.fun/c/gta6-trophy-guide-01).
 
-## What it is
+## What it does
 
-- **Complete checklist** — every trophy with its official name, description and grade as PlayStation publishes them, plus a guide in our own words that cites its sources.
+- **Complete checklist** — every trophy with its official name, description and grade as PlayStation publishes them, plus a guide written for this entry that cites its sources.
 - **Tracker** — tick trophies off, progress saves in the browser (localStorage), export it to a file and import it back, or share it with a link.
 - **Filters** — by kind (story, missable, collectibles, activities, online) and by grade, plus text search.
 - **Spoiler setting** — hides the names and descriptions of story trophies until they are earned.

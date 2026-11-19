@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 const appRoot = resolve(fileURLToPath(new URL('./app', import.meta.url)));
 const portArg = process.argv.indexOf('--port');
-const wanted = portArg === -1 ? 8080 : Number(process.argv[portArg + 1]);
-const port = Number.isInteger(wanted) && wanted > 0 && wanted < 65536 ? wanted : 8080;
+const parsed = portArg === -1 ? 8080 : Number(process.argv[portArg + 1]);
+const port = Number.isInteger(parsed) && parsed > 0 && parsed < 65536 ? parsed : 8080;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -25,6 +25,22 @@ const TYPES = {
   '.ico': 'image/x-icon',
 };
 
+function contentType(file) {
+  return TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream';
+}
+
+function resolveFile(pathname) {
+  const file = resolve(join(appRoot, normalize(pathname)));
+  if (file !== appRoot && !file.startsWith(appRoot + sep)) return null;
+  try {
+    const info = statSync(file);
+    if (!info.isFile()) return null;
+    return { file, size: info.size };
+  } catch {
+    return null;
+  }
+}
+
 createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://localhost');
   let pathname = '/';
@@ -35,26 +51,17 @@ createServer((request, response) => {
     return;
   }
   if (pathname.endsWith('/')) pathname += 'index.html';
-  const file = resolve(join(appRoot, normalize(pathname)));
-  if (file !== appRoot && !file.startsWith(appRoot + sep)) {
-    response.writeHead(403).end('forbidden');
-    return;
-  }
-  let size;
-  try {
-    const info = statSync(file);
-    if (!info.isFile()) throw new Error('not a file');
-    size = info.size;
-  } catch {
+  const found = resolveFile(pathname);
+  if (!found) {
     response.writeHead(404).end('not found');
     return;
   }
   response.writeHead(200, {
-    'content-type': TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream',
-    'content-length': size,
+    'content-type': contentType(found.file),
+    'content-length': found.size,
     'cache-control': 'no-store',
   });
-  createReadStream(file).pipe(response);
+  createReadStream(found.file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
   console.log(`Leonida Platinum is on http://localhost:${port}`);
 });

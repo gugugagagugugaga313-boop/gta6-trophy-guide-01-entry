@@ -7,6 +7,10 @@ export function gradeLabel(grade) {
   return grade.charAt(0).toUpperCase() + grade.slice(1);
 }
 
+export function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
 /** True when a trophy passes the active kind, grade and search filters. */
 export function trophyMatches(trophy, filters) {
   if (filters.kind === 'missable' && !trophy.missable) return false;
@@ -25,35 +29,34 @@ export function isSpoilerHidden(trophy, earned, spoilerOn) {
   return spoilerOn && trophy.kind === 'story' && !earned.has(trophy.id);
 }
 
-function tagRow(trophy) {
-  const tags = [`<span class="tag">${KIND_LABELS[trophy.kind] || trophy.kind}</span>`];
-  if (trophy.missable) tags.push('<span class="tag missable">Missable</span>');
-  if (trophy.target) tags.push(`<span class="tag">${escapeHtml(trophy.target)}</span>`);
-  return tags.join('');
+function chipsFor(trophy) {
+  const chips = [`<span class="chip">${KIND_LABELS[trophy.kind] || trophy.kind}</span>`];
+  if (trophy.missable) chips.push('<span class="chip missable">Missable</span>');
+  if (trophy.target) chips.push(`<span class="chip">${escapeHtml(trophy.target)}</span>`);
+  return chips.join('');
 }
 
-export function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function rowHtml(trophy, state) {
+  const earned = state.earned.has(trophy.id);
+  const hidden = isSpoilerHidden(trophy, state.earned, state.spoilerOn);
+  const name = hidden ? '<span class="masked">Hidden story trophy — earn it to reveal</span>' : escapeHtml(trophy.name);
+  const desc = hidden ? 'Name and description hidden by the spoiler setting.' : escapeHtml(trophy.description);
+  const selected = state.selectedId === trophy.id ? ' is-selected' : '';
+  const done = earned ? ' is-earned' : '';
+  const label = hidden ? 'story trophy' : escapeHtml(trophy.name);
+  return `<li class="row${done}${selected}" data-id="${trophy.id}">
+    <input type="checkbox" ${earned ? 'checked' : ''} aria-label="Mark ${label} earned">
+    <span><span class="row-name">${name}</span><br><span class="row-desc">${desc}</span>
+    <span class="row-tags">${chipsFor(trophy)}</span></span>
+    <span class="grade-mark grade-${trophy.grade}">${gradeLabel(trophy.grade)}</span>
+  </li>`;
 }
 
-/** Render the checklist rows into listEl. */
+/** Render the checklist rows into listEl. Returns how many are visible. */
 export function renderChecklist(listEl, trophies, state, callbacks) {
   const visible = trophies.filter((t) => trophyMatches(t, state.filters));
-  listEl.innerHTML = visible
-    .map((t) => {
-      const earned = state.earned.has(t.id);
-      const hidden = isSpoilerHidden(t, state.earned, state.spoilerOn);
-      const name = hidden ? '<span class="hidden-name">Hidden story trophy — earn it to reveal</span>' : escapeHtml(t.name);
-      const desc = hidden ? 'Name and description hidden by the spoiler setting.' : escapeHtml(t.description);
-      return `<li class="trophy-row${earned ? ' is-earned' : ''}${state.selectedId === t.id ? ' is-selected' : ''}" data-id="${t.id}">
-        <input type="checkbox" ${earned ? 'checked' : ''} aria-label="Mark ${hidden ? 'story trophy' : escapeHtml(t.name)} earned">
-        <span><span class="trophy-name">${name}</span><br><span class="trophy-desc">${desc}</span>
-        <span class="trophy-tags">${tagRow(t)}</span></span>
-        <span class="grade-mark grade-${t.grade}">${gradeLabel(t.grade)}</span>
-      </li>`;
-    })
-    .join('');
-  listEl.querySelectorAll('.trophy-row').forEach((row) => {
+  listEl.innerHTML = visible.map((t) => rowHtml(t, state)).join('');
+  listEl.querySelectorAll('.row').forEach((row) => {
     const id = Number(row.dataset.id);
     row.addEventListener('click', (event) => {
       if (event.target.tagName === 'INPUT') return;
@@ -77,19 +80,22 @@ export function renderDetail(paneEl, trophy, state, callbacks) {
   const hidden = isSpoilerHidden(trophy, state.earned, state.spoilerOn);
   const name = hidden ? 'Hidden story trophy' : escapeHtml(trophy.name);
   const desc = hidden ? 'This story trophy is hidden by the spoiler setting. Earn it to reveal its name and description.' : escapeHtml(trophy.description);
+  const guide = hidden ? 'Guide hidden with the trophy. Earn it to reveal the guide.' : escapeHtml(trophy.guide);
   const sources = trophy.sources
     .map((s) => `<li><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a></li>`)
     .join('');
+  const missableChip = trophy.missable ? '<span class="chip missable">Missable</span>' : '';
+  const targetChip = trophy.target ? `<span class="chip">${escapeHtml(trophy.target)}</span>` : '';
   paneEl.innerHTML = `
     <h2>${name}</h2>
-    <p><span class="tag grade-${trophy.grade}">${gradeLabel(trophy.grade)}</span>
-    <span class="tag">${KIND_LABELS[trophy.kind] || trophy.kind}</span>
-    ${trophy.missable ? '<span class="tag missable">Missable</span>' : ''}
-    ${trophy.target ? `<span class="tag">${escapeHtml(trophy.target)}</span>` : ''}
-    <span class="tag">Roadmap stage ${trophy.stage}</span></p>
+    <p class="chip-row"><span class="chip grade-${trophy.grade}">${gradeLabel(trophy.grade)}</span>
+    <span class="chip">${KIND_LABELS[trophy.kind] || trophy.kind}</span>
+    ${missableChip}
+    ${targetChip}
+    <span class="chip">Roadmap stage ${trophy.stage}</span></p>
     <p class="official"><b>Official description</b>${desc}</p>
     <h3>Guide</h3>
-    <p class="guide-text">${hidden ? 'Guide hidden with the trophy. Earn it to reveal the guide.' : escapeHtml(trophy.guide)}</p>
+    <p class="guide-body">${guide}</p>
     <h3>Sources</h3>
     <ul>${sources}</ul>
     <p class="source-note">The guide above is written for this entry from the official description. Where the description names no place or step, the guide says so instead of inventing one.</p>

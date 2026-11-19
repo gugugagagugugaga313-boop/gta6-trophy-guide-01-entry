@@ -24,23 +24,26 @@ const DOSSIER_OPTIONS = {
   app_max_files: 993,
   app_max_bytes: 50331648,
 };
+const SCREENSHOT_CAP = 262144;
 
 function fail(message) {
   throw new Error(`Leonida Platinum hand-in failed: ${message}`);
 }
 
+function screenshotNames() {
+  const dir = join(repoRoot, 'screenshots');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((name) => !name.startsWith('.'));
+}
+
 function checkGuidePresent() {
-  const indexPath = join(repoRoot, 'app', 'index.html');
-  const dataPath = join(repoRoot, 'app', 'data', 'trophies.json');
-  if (!existsSync(indexPath)) fail('app/index.html is missing.');
-  if (!existsSync(dataPath)) fail('app/data/trophies.json is missing.');
-  const shots = existsSync(join(repoRoot, 'screenshots'))
-    ? readdirSync(join(repoRoot, 'screenshots')).filter((name) => !name.startsWith('.'))
-    : [];
+  if (!existsSync(join(repoRoot, 'app', 'index.html'))) fail('app/index.html is missing.');
+  if (!existsSync(join(repoRoot, 'app', 'data', 'trophies.json'))) fail('app/data/trophies.json is missing.');
+  const shots = screenshotNames();
   if (shots.length < 3 || shots.length > 4) fail(`expected 3 or 4 screenshots, found ${shots.length}.`);
   for (const shot of shots) {
     const size = statSync(join(repoRoot, 'screenshots', shot)).size;
-    if (size > 262144) fail(`screenshot ${shot} is ${size} bytes, over the 256 KiB cap.`);
+    if (size > SCREENSHOT_CAP) fail(`screenshot ${shot} is ${size} bytes, over the 256 KiB cap.`);
   }
 }
 

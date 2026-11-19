@@ -8,35 +8,35 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="masthead">
-  <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; Works offline</p>
+<header class="top">
+  <p class="kicker">Grand Theft Auto VI &middot; PlayStation 5 &middot; Works offline</p>
   <h1>Leonida Platinum</h1>
-  <p class="standfirst">The complete trophy guide and tracker for GTA VI: all 55 official trophies, a roadmap to the platinum, every missable flagged, and a guide for each trophy that cites its sources.</p>
-  <div class="progress-wrap" aria-label="Overall progress">
-    <div class="progress-line"><span id="progressText">0 of 55 earned</span><span id="gradeCounts"></span></div>
-    <div class="progress-bar"><span id="progressFill"></span></div>
+  <p class="intro">The complete trophy guide and tracker for GTA VI: all 55 official trophies, a roadmap to the platinum, every missable flagged, and a guide for each trophy that cites its sources.</p>
+  <div class="progress" aria-label="Overall progress">
+    <p class="progress-row"><span id="progressText">0 of 55 earned</span><span id="gradeCounts"></span></p>
+    <div class="bar"><span id="progressFill"></span></div>
   </div>
 </header>
 
-<nav class="views" aria-label="Views">
-  <button type="button" class="view-tab is-active" data-view="tracker">Tracker</button>
-  <button type="button" class="view-tab" data-view="roadmap">Roadmap to Platinum</button>
-  <button type="button" class="view-tab" data-view="missables">Missable trophies</button>
+<nav class="tabs" aria-label="Views">
+  <button type="button" class="tab is-on" data-view="tracker">Tracker</button>
+  <button type="button" class="tab" data-view="roadmap">Roadmap to Platinum</button>
+  <button type="button" class="tab" data-view="missables">Missable trophies</button>
 </nav>
 
-<section class="toolbar" aria-label="Tracker controls">
-  <label class="search">Search trophies
+<section class="controls" aria-label="Tracker controls">
+  <label class="field">Search trophies
     <input id="searchInput" type="search" placeholder="Name, mission or keyword&hellip;" autocomplete="off">
   </label>
-  <div class="kind-filters" id="kindFilters" role="group" aria-label="Filter by kind">
-    <button type="button" class="kind-btn is-active" data-kind="all">All</button>
-    <button type="button" class="kind-btn" data-kind="story">Story</button>
-    <button type="button" class="kind-btn" data-kind="missable">Missable</button>
-    <button type="button" class="kind-btn" data-kind="collectibles">Collectibles</button>
-    <button type="button" class="kind-btn" data-kind="activities">Activities</button>
-    <button type="button" class="kind-btn" data-kind="online">Online</button>
+  <div class="kinds" id="kindFilters" role="group" aria-label="Filter by kind">
+    <button type="button" class="kind is-on" data-kind="all">All</button>
+    <button type="button" class="kind" data-kind="story">Story</button>
+    <button type="button" class="kind" data-kind="missable">Missable</button>
+    <button type="button" class="kind" data-kind="collectibles">Collectibles</button>
+    <button type="button" class="kind" data-kind="activities">Activities</button>
+    <button type="button" class="kind" data-kind="online">Online</button>
   </div>
-  <label class="grade-pick">Grade
+  <label class="field">Grade
     <select id="gradeFilter">
       <option value="all">All grades</option>
       <option value="platinum">Platinum</option>
@@ -45,43 +45,43 @@
       <option value="bronze">Bronze</option>
     </select>
   </label>
-  <label class="spoiler-pick"><input id="spoilerToggle" type="checkbox"> Hide story spoilers</label>
-  <div class="save-actions">
+  <label class="spoilers"><input id="spoilerToggle" type="checkbox"> Hide story spoilers</label>
+  <div class="actions">
     <button id="exportBtn" type="button">Export progress</button>
-    <label class="import-btn">Import progress <input id="importInput" type="file" accept="application/json,.json"></label>
+    <label class="import">Import progress <input id="importInput" type="file" accept="application/json,.json"></label>
     <button id="resetBtn" type="button">Reset</button>
   </div>
-  <p class="filter-note" id="filterNote"></p>
+  <p class="hint" id="filterNote"></p>
 </section>
 
 <main>
-  <section id="trackerView" class="tracker-grid">
-    <div class="list-col">
+  <section id="trackerView" class="split">
+    <div class="checklist">
       <h2 id="listHeading">Checklist</h2>
-      <ol id="trophyList" class="trophy-list"></ol>
-      <p class="empty-note" id="emptyNote" hidden>No trophies match these filters.</p>
+      <ol id="trophyList" class="rows"></ol>
+      <p class="none" id="emptyNote" hidden>No trophies match these filters.</p>
     </div>
-    <aside class="detail-col" aria-label="Selected trophy guide">
-      <div id="detailPane" class="detail-pane"></div>
-      <div class="sourcing-box">
+    <aside class="side" aria-label="Selected trophy guide">
+      <div id="detailPane" class="panel"></div>
+      <div class="about">
         <h3>How this guide is sourced</h3>
         <p>Names, descriptions, grades and counts are the official PlayStation list. Each guide is written for this entry from the official description alone. The game released 19 November 2026, so no complete playthrough source exists yet for step-by-step detail, and no location or step is invented here. Where a description names no place, the guide says so.</p>
         <p>List sources: <a href="https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/">Exophase trophy list</a> &middot; <a href="https://psnprofiles.com/trophies/43531-grand-theft-auto-vi">PSNProfiles trophy list</a></p>
-        <p class="offline-note">Offline: this page loads only its own files and makes no network request. Links above open only if you follow them.</p>
+        <p class="offline">Offline: this page loads only its own files and makes no network request. Links above open only if you follow them.</p>
       </div>
     </aside>
   </section>
 
-  <section id="roadmapView" class="roadmap-view" hidden>
+  <section id="roadmapView" class="roadmap" hidden>
     <h2 id="roadmapTitle">Road to the Platinum</h2>
-    <p id="roadmapNote" class="roadmap-note"></p>
-    <ol id="roadmapStages" class="roadmap-stages"></ol>
+    <p id="roadmapNote" class="note"></p>
+    <ol id="roadmapStages" class="stages"></ol>
   </section>
 
-  <section id="missablesView" class="missables-view" hidden>
+  <section id="missablesView" class="missables" hidden>
     <h2>Missable trophies — 18 to watch</h2>
-    <p class="missable-rule" id="missableRule"></p>
-    <ol id="missableList" class="trophy-list"></ol>
+    <p class="note" id="missableRule"></p>
+    <ol id="missableList" class="rows"></ol>
   </section>
 </main>
 

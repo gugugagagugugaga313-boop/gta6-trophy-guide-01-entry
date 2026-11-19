@@ -6,6 +6,13 @@
 export const STORAGE_KEY = 'leonida-platinum-progress-v1';
 export const TOTAL_TROPHIES = 55;
 
+/** Keep only ids in the trophy range, as a sorted array. */
+function cleanIds(ids) {
+  return [...new Set(ids)]
+    .filter((id) => Number.isInteger(id) && id >= 1 && id <= TOTAL_TROPHIES)
+    .sort((a, b) => a - b);
+}
+
 /** Read the earned set from localStorage. Returns a Set of trophy ids. */
 export function loadEarned() {
   try {
@@ -13,7 +20,7 @@ export function loadEarned() {
     if (!raw) return new Set();
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
-    return new Set(parsed.filter((id) => Number.isInteger(id) && id >= 1 && id <= TOTAL_TROPHIES));
+    return new Set(cleanIds(parsed));
   } catch {
     return new Set();
   }
@@ -22,7 +29,7 @@ export function loadEarned() {
 /** Persist the earned set to localStorage. */
 export function saveEarned(earned) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...earned].sort((a, b) => a - b)));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanIds([...earned])));
   } catch {
     /* Storage full or blocked: the checklist still works for this visit. */
   }
@@ -40,7 +47,7 @@ export function toggleEarned(earned, id) {
 /** Serialise progress for export. */
 export function exportProgressText(earned) {
   return JSON.stringify(
-    { game: 'Grand Theft Auto VI', tracker: 'Leonida Platinum', exportedAt: new Date().toISOString(), earned: [...earned].sort((a, b) => a - b) },
+    { game: 'Grand Theft Auto VI', tracker: 'Leonida Platinum', exportedAt: new Date().toISOString(), earned: cleanIds([...earned]) },
     null,
     2,
   );
@@ -51,7 +58,7 @@ export function parseImportedProgress(text) {
   const parsed = JSON.parse(text);
   const ids = Array.isArray(parsed) ? parsed : parsed.earned;
   if (!Array.isArray(ids)) throw new Error('Expected a JSON list of trophy ids.');
-  const clean = ids.filter((id) => Number.isInteger(id) && id >= 1 && id <= TOTAL_TROPHIES);
+  const clean = cleanIds(ids);
   if (clean.length === 0 && ids.length > 0) throw new Error('No valid trophy ids found.');
   return new Set(clean);
 }
@@ -60,8 +67,7 @@ export function parseImportedProgress(text) {
 export function earnedFromHash() {
   const match = location.hash.match(/earned=([0-9,]+)/);
   if (!match) return null;
-  const ids = match[1].split(',').map(Number).filter((id) => Number.isInteger(id) && id >= 1 && id <= TOTAL_TROPHIES);
-  return new Set(ids);
+  return new Set(cleanIds(match[1].split(',').map(Number)));
 }
 
 /** Trigger a download of the exported progress file. */

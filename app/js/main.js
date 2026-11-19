@@ -17,7 +17,7 @@ const state = {
   view: 'tracker',
 };
 
-const els = {
+const el = {
   progressText: document.getElementById('progressText'),
   progressFill: document.getElementById('progressFill'),
   gradeCounts: document.getElementById('gradeCounts'),
@@ -39,7 +39,7 @@ const els = {
   missableList: document.getElementById('missableList'),
 };
 
-const views = {
+const viewEls = {
   tracker: document.getElementById('trackerView'),
   roadmap: document.getElementById('roadmapView'),
   missables: document.getElementById('missablesView'),
@@ -49,91 +49,91 @@ function selectedTrophy() {
   return state.trophies.find((t) => t.id === state.selectedId) || state.trophies[0];
 }
 
-function refreshAll() {
-  const visible = renderChecklist(els.trophyList, state.trophies, state, callbacks);
-  els.emptyNote.hidden = visible > 0;
-  renderDetail(els.detailPane, selectedTrophy(), state, callbacks);
-  updateProgress(els.progressText, els.progressFill, els.gradeCounts, state.trophies, state.earned);
-  if (state.roadmap) renderRoadmap(els.roadmapStages, els.roadmapTitle, els.roadmapNote, state.roadmap, state.trophies, state.earned);
-  renderMissables(els.missableList, els.missableRule, state.trophies, state.missableRule);
+function refresh() {
+  const visible = renderChecklist(el.trophyList, state.trophies, state, actions);
+  el.emptyNote.hidden = visible > 0;
+  renderDetail(el.detailPane, selectedTrophy(), state, actions);
+  updateProgress(el.progressText, el.progressFill, el.gradeCounts, state.trophies, state.earned);
+  if (state.roadmap) renderRoadmap(el.roadmapStages, el.roadmapTitle, el.roadmapNote, state.roadmap, state.trophies, state.earned);
+  renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule);
   const kindName = state.filters.kind === 'all' ? 'all kinds' : (KIND_LABELS[state.filters.kind] || state.filters.kind);
-  els.filterNote.textContent =
+  el.filterNote.textContent =
     state.filters.kind === 'online'
       ? 'Online: the official list names no online trophy, so this filter is empty by design.'
       : `Showing ${visible} of ${state.trophies.length} trophies — ${kindName}, grade ${state.filters.grade}${state.spoilerOn ? ', spoilers hidden' : ''}.`;
 }
 
-function showView(name) {
+function switchView(name) {
   state.view = name;
-  Object.entries(views).forEach(([key, el]) => {
-    el.hidden = key !== name;
+  Object.entries(viewEls).forEach(([key, section]) => {
+    section.hidden = key !== name;
   });
-  document.querySelectorAll('.view-tab').forEach((tab) => {
-    tab.classList.toggle('is-active', tab.dataset.view === name);
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.classList.toggle('is-on', tab.dataset.view === name);
   });
-  if (name === 'roadmap' && state.roadmap) renderRoadmap(els.roadmapStages, els.roadmapTitle, els.roadmapNote, state.roadmap, state.trophies, state.earned);
-  if (name === 'missables') renderMissables(els.missableList, els.missableRule, state.trophies, state.missableRule);
+  if (name === 'roadmap' && state.roadmap) renderRoadmap(el.roadmapStages, el.roadmapTitle, el.roadmapNote, state.roadmap, state.trophies, state.earned);
+  if (name === 'missables') renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule);
 }
 
-const callbacks = {
+const actions = {
   onSelect(id) {
     state.selectedId = id;
-    refreshAll();
-    els.detailPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    refresh();
+    el.detailPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   },
   onToggle(id) {
     state.earned = toggleEarned(state.earned, id);
-    refreshAll();
+    refresh();
   },
 };
 
 function wireControls() {
-  els.searchInput.addEventListener('input', () => {
-    state.filters.query = els.searchInput.value.trim();
-    refreshAll();
+  el.searchInput.addEventListener('input', () => {
+    state.filters.query = el.searchInput.value.trim();
+    refresh();
   });
-  els.kindFilters.addEventListener('click', (event) => {
+  el.kindFilters.addEventListener('click', (event) => {
     const btn = event.target.closest('[data-kind]');
     if (!btn) return;
     state.filters.kind = btn.dataset.kind;
-    els.kindFilters.querySelectorAll('.kind-btn').forEach((b) => b.classList.toggle('is-active', b === btn));
-    refreshAll();
+    el.kindFilters.querySelectorAll('.kind').forEach((b) => b.classList.toggle('is-on', b === btn));
+    refresh();
   });
-  els.gradeFilter.addEventListener('change', () => {
-    state.filters.grade = els.gradeFilter.value;
-    refreshAll();
+  el.gradeFilter.addEventListener('change', () => {
+    state.filters.grade = el.gradeFilter.value;
+    refresh();
   });
-  els.spoilerToggle.addEventListener('change', () => {
-    state.spoilerOn = els.spoilerToggle.checked;
-    refreshAll();
+  el.spoilerToggle.addEventListener('change', () => {
+    state.spoilerOn = el.spoilerToggle.checked;
+    refresh();
   });
-  els.exportBtn.addEventListener('click', () => downloadExport(state.earned));
-  els.importInput.addEventListener('change', async () => {
-    const file = els.importInput.files[0];
+  el.exportBtn.addEventListener('click', () => downloadExport(state.earned));
+  el.importInput.addEventListener('change', async () => {
+    const file = el.importInput.files[0];
     if (!file) return;
     try {
       const imported = parseImportedProgress(await file.text());
       state.earned = imported;
       saveEarned(state.earned);
-      refreshAll();
+      refresh();
     } catch {
       alert('That file is not a Leonida Platinum progress export.');
     }
-    els.importInput.value = '';
+    el.importInput.value = '';
   });
-  els.resetBtn.addEventListener('click', () => {
+  el.resetBtn.addEventListener('click', () => {
     if (!confirm('Clear all earned trophies?')) return;
     state.earned = new Set();
     saveEarned(state.earned);
-    refreshAll();
+    refresh();
   });
-  document.querySelectorAll('.view-tab').forEach((tab) => {
-    tab.addEventListener('click', () => showView(tab.dataset.view));
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => switchView(tab.dataset.view));
   });
 }
 
-/** Read deep links: #view=roadmap, #trophy=17, #earned=1,2,3. */
-function applyHash() {
+/** Read deep links: #view=roadmap, #trophy=17, #earned=1,2,3, #spoilers=on. */
+function readHash() {
   const viewMatch = location.hash.match(/view=(tracker|roadmap|missables)/);
   if (viewMatch) state.view = viewMatch[1];
   const trophyMatch = location.hash.match(/trophy=(\d+)/);
@@ -146,10 +146,9 @@ function applyHash() {
     state.earned = shared;
     saveEarned(state.earned);
   }
-  const spoilerMatch = location.hash.match(/spoilers=on/);
-  if (spoilerMatch) {
+  if (/spoilers=on/.test(location.hash)) {
     state.spoilerOn = true;
-    els.spoilerToggle.checked = true;
+    el.spoilerToggle.checked = true;
   }
 }
 
@@ -161,10 +160,10 @@ async function boot() {
   state.trophies = trophyData.trophies;
   state.missableRule = trophyData.missableRule;
   state.roadmap = roadmapData;
-  applyHash();
+  readHash();
   wireControls();
-  showView(state.view);
-  refreshAll();
+  switchView(state.view);
+  refresh();
 }
 
 boot();
