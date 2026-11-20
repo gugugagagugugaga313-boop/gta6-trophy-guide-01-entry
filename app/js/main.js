@@ -3,7 +3,7 @@
    in sync. Everything runs from local files; no network request is made. */
 
 import { loadEarned, saveEarned, toggleEarned, downloadExport, parseImportedProgress, earnedFromHash } from './store.js';
-import { renderChecklist, renderDetail, updateProgress, KIND_LABELS } from './tracker.js';
+import { renderChecklist, renderDetail, updateProgress, KIND_NAMES } from './tracker.js';
 import { renderRoadmap, renderMissables } from './roadmap.js';
 
 const state = {
@@ -39,7 +39,7 @@ const el = {
   missableList: document.getElementById('missableList'),
 };
 
-const viewEls = {
+const viewSections = {
   tracker: document.getElementById('trackerView'),
   roadmap: document.getElementById('roadmapView'),
   missables: document.getElementById('missablesView'),
@@ -55,8 +55,8 @@ function refresh() {
   renderDetail(el.detailPane, selectedTrophy(), state, actions);
   updateProgress(el.progressText, el.progressFill, el.gradeCounts, state.trophies, state.earned);
   if (state.roadmap) renderRoadmap(el.roadmapStages, el.roadmapTitle, el.roadmapNote, state.roadmap, state.trophies, state.earned);
-  renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule);
-  const kindName = state.filters.kind === 'all' ? 'all kinds' : (KIND_LABELS[state.filters.kind] || state.filters.kind);
+  renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule, actions);
+  const kindName = state.filters.kind === 'all' ? 'all kinds' : (KIND_NAMES[state.filters.kind] || state.filters.kind);
   el.filterNote.textContent =
     state.filters.kind === 'online'
       ? 'Online: the official list names no online trophy, so this filter is empty by design.'
@@ -65,19 +65,25 @@ function refresh() {
 
 function switchView(name) {
   state.view = name;
-  Object.entries(viewEls).forEach(([key, section]) => {
+  Object.entries(viewSections).forEach(([key, section]) => {
     section.hidden = key !== name;
   });
-  document.querySelectorAll('.tab').forEach((tab) => {
-    tab.classList.toggle('is-on', tab.dataset.view === name);
+  document.querySelectorAll('.view-btn').forEach((tab) => {
+    tab.classList.toggle('is-active', tab.dataset.view === name);
   });
   if (name === 'roadmap' && state.roadmap) renderRoadmap(el.roadmapStages, el.roadmapTitle, el.roadmapNote, state.roadmap, state.trophies, state.earned);
-  if (name === 'missables') renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule);
+  if (name === 'missables') renderMissables(el.missableList, el.missableRule, state.trophies, state.missableRule, actions);
 }
 
 const actions = {
   onSelect(id) {
     state.selectedId = id;
+    refresh();
+    el.detailPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+  onSelectMissable(id) {
+    state.selectedId = id;
+    switchView('tracker');
     refresh();
     el.detailPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   },
@@ -96,7 +102,7 @@ function wireControls() {
     const btn = event.target.closest('[data-kind]');
     if (!btn) return;
     state.filters.kind = btn.dataset.kind;
-    el.kindFilters.querySelectorAll('.kind').forEach((b) => b.classList.toggle('is-on', b === btn));
+    el.kindFilters.querySelectorAll('.filter-btn').forEach((b) => b.classList.toggle('is-active', b === btn));
     refresh();
   });
   el.gradeFilter.addEventListener('change', () => {
@@ -127,7 +133,7 @@ function wireControls() {
     saveEarned(state.earned);
     refresh();
   });
-  document.querySelectorAll('.tab').forEach((tab) => {
+  document.querySelectorAll('.view-btn').forEach((tab) => {
     tab.addEventListener('click', () => switchView(tab.dataset.view));
   });
 }
