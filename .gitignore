@@ -1,4 +1,6 @@
+# build outputs and local tooling
 out/
 out2/
 node_modules/
 .DS_Store
+*.log
