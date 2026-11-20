@@ -1,40 +1,50 @@
-# Leonida Platinum — GTA VI Trophy Guide & Tracker
+# Leonida Platinum
 
-[![GTA 6 Trophy Guide](https://make.fun/badge/gta6-trophy-guide-01.svg)](https://make.fun/c/gta6-trophy-guide-01)
-[![Rank](https://make.fun/badge/gta6-trophy-guide-01/gugugagagugugaga313-boop/gta6-trophy-guide-01-entry/rank.svg)](https://make.fun/c/gta6-trophy-guide-01)
-[![Reward](https://make.fun/badge/gta6-trophy-guide-01/gugugagagugugaga313-boop/gta6-trophy-guide-01-entry/reward.svg)](https://make.fun/c/gta6-trophy-guide-01)
+A complete, spoiler-safe trophy guide for Grand Theft Auto VI on PS5 — all 55
+trophies, with a checklist tracker you can tick off as you play.
 
-An offline guide and tracker for all **55 PlayStation 5 trophies** of Grand Theft Auto VI (1 platinum, 2 gold, 6 silver, 46 bronze), built for the [make.fun GTA 6 trophy guide competition](https://make.fun/c/gta6-trophy-guide-01).
+## What it covers
 
-## What it does
+- **55 trophies**: 1 Platinum, 2 Gold, 6 Silver, 46 Bronze. No online trophies
+  exist in the official list, so everything here is single-player.
+- **Every trophy gets a short guide** written from its official description,
+  plus the counts that matter (250 stunts, 42 Shooting Range medals, 14 drone
+  race spots, 100 vehicles, 52 areas, and the rest).
+- **18 missables flagged**, with the rule spelled out: a trophy is missable
+  when its description ties it to one named mission, one character's final
+  mission, a partner-only window, or a single story beat. GTA VI has no
+  mission replay, so the guide tells you to keep a manual save at the start
+  of every chapter and one from just before the finale.
+- **A five-phase roadmap**: story first, then stranger strands, then
+  activities and skills, then collectibles and exploration, then money,
+  mayhem and cleanup. The Platinum and 100% completion close the run.
 
-- **Complete checklist** — every trophy with its official name, description and grade as PlayStation publishes them, plus a guide written for this entry that cites its sources.
-- **Tracker** — tick trophies off, progress saves in the browser (localStorage), export it to a file and import it back, or share it with a link.
-- **Filters** — by kind (story, missable, collectibles, activities, online) and by grade, plus text search.
-- **Spoiler setting** — hides the names and descriptions of story trophies until they are earned.
-- **Roadmap to the platinum** — five stages in play order, with per-stage progress.
-- **Missable flags** — 18 trophies flagged, built from the official descriptions alone: one named mission, one character's final mission, a partner-only window, or a single story beat.
+## The tracker
 
-## Honest sourcing
+Open `app/index.html` in a browser (or run `node serve.ts --port 8901`).
+Everything runs from local files — no network requests, no account, no
+Rockstar artwork.
 
-The game released 19 November 2026, so no complete playthrough source exists yet for step-by-step detail. Every guide is written from the official trophy description alone, and where a description names no place or step, the guide says so instead of inventing one. List sources: the [official trophy list on Exophase](https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/) and the [PSNProfiles trophy list](https://psnprofiles.com/trophies/43531-grand-theft-auto-vi).
+- Tick trophies off; progress saves in your browser (localStorage) and the
+  progress bar counts by grade.
+- Filter by group (story / activities / collectibles), grade, or text search;
+  show missables only.
+- **Spoiler mode** hides the name and guide of every unearned story trophy
+  until you earn it or switch the mode off.
+- **Export** your progress to a file, **import** it back on another machine,
+  or share it with an `#earned=` link that pre-ticks the trophies in the URL.
+- Deep links: `#view=roadmap`, `#trophy=17`, `#spoilers=on`.
 
-## Run it
+## Sources
 
-Serve `app/` with any static server and open `index.html` in desktop Chrome. It works with the network off — it loads only its own files and makes no network request.
+Trophy names, descriptions and grades are the official list, checked against
+Exophase (https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/)
+and PSNProfiles (https://psnprofiles.com/trophies/43531-grand-theft-auto-vi).
+All guide text is original writing built from those descriptions. This is a
+fan-made guide, not affiliated with Rockstar Games.
 
-```sh
-node serve.ts        # then open http://localhost:8080
-```
+## Hand-in
 
-## Hand it in
-
-```sh
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-```
-
-`main.ts` copies `app/` and `screenshots/` to the output directory and writes `dossier.json` with the vendored make.fun library.
-
-## License
-
-MIT. An unofficial fan-made guide; no Rockstar Games logo, artwork or game screenshot is used.
+`node main.ts` copies `app/` and `screenshots/` into the output directory
+(`MAKEFUN_OUTPUT_DIR`, default `/output`) and writes `dossier.json` there
+with the vendored make.fun summary library.

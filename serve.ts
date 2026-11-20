@@ -1,67 +1,40 @@
-// Tiny static server for local development only: serves app/ on
-// http://localhost:8080 so the guide can be tried in desktop Chrome.
-// Usage: node serve.ts [--port 8080]. Standard library only.
+// Leonida Platinum — tiny static server for local preview only.
+// Run: node serve.ts --port 8901, then open http://localhost:8901/
+// Serves the files under app/ and nothing else; no network calls are made.
 
-import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { extname, join, normalize, resolve, sep } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const appRoot = resolve(fileURLToPath(new URL('./app', import.meta.url)));
-const portArg = process.argv.indexOf('--port');
-const parsed = portArg === -1 ? 8080 : Number(process.argv[portArg + 1]);
-const port = Number.isInteger(parsed) && parsed > 0 && parsed < 65536 ? parsed : 8080;
+const root = join(fileURLToPath(new URL('.', import.meta.url)), 'app');
+const port = Number(process.argv.find((a) => a.startsWith('--port='))?.slice(7) ?? process.argv[process.argv.indexOf('--port') + 1] ?? 8901);
 
-const TYPES = {
+const types = {
   '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
+  '.png': 'image/png',
 };
 
-function contentType(file) {
-  return TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream';
-}
-
-function resolveFile(pathname) {
-  const file = resolve(join(appRoot, normalize(pathname)));
-  if (file !== appRoot && !file.startsWith(appRoot + sep)) return null;
-  try {
-    const info = statSync(file);
-    if (!info.isFile()) return null;
-    return { file, size: info.size };
-  } catch {
-    return null;
-  }
-}
-
-createServer((request, response) => {
-  const url = new URL(request.url ?? '/', 'http://localhost');
-  let pathname = '/';
-  try {
-    pathname = decodeURIComponent(url.pathname);
-  } catch {
-    response.writeHead(400).end('bad request');
+const server = createServer(async (req, res) => {
+  const path = req.url === '/' || !req.url ? '/index.html' : req.url.split('?')[0].split('#')[0];
+  const file = join(root, decodeURIComponent(path));
+  if (!file.startsWith(root)) {
+    res.writeHead(403);
+    res.end('no');
     return;
   }
-  if (pathname.endsWith('/')) pathname += 'index.html';
-  const found = resolveFile(pathname);
-  if (!found) {
-    response.writeHead(404).end('not found');
-    return;
+  try {
+    const body = await readFile(file);
+    res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
+    res.end(body);
+  } catch {
+    res.writeHead(404);
+    res.end('not found');
   }
-  response.writeHead(200, {
-    'content-type': contentType(found.file),
-    'content-length': found.size,
-    'cache-control': 'no-store',
-  });
-  createReadStream(found.file).pipe(response);
-}).listen(port, '127.0.0.1', () => {
-  console.log(`Leonida Platinum is on http://localhost:${port}`);
 });
+
+server.listen(port, () => console.log(`Leonida Platinum preview at http://localhost:${port}/`));

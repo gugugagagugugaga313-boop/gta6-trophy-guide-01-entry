@@ -1,43 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leonida Platinum — GTA VI Trophy Guide &amp; Tracker</title>
-<meta name="description" content="Offline guide and tracker for all 55 PlayStation 5 trophies of Grand Theft Auto VI: official names, descriptions and grades, a five-stage road to the platinum, missable flags, and a cited guide for every trophy.">
-<link rel="stylesheet" href="style.css">
+<title>Leonida Platinum — GTA VI Trophy Guide</title>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
 <header class="masthead">
-  <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; Works offline</p>
-  <h1>Leonida Platinum</h1>
-  <p class="lede">The full trophy guide and tracker for GTA VI: all 55 official trophies, a road map to the platinum, every missable flagged, and a guide for each trophy with its sources cited.</p>
-  <div class="progress" aria-label="Overall progress">
-    <p class="progress-line"><span id="progressText">0 of 55 earned</span><span id="gradeCounts"></span></p>
-    <div class="meter"><span id="progressFill"></span></div>
+  <div class="masthead-inner">
+    <p class="kicker">Grand Theft Auto VI &middot; PlayStation 5</p>
+    <h1>Leonida Platinum</h1>
+    <p class="tagline">Every trophy, every missable, one checklist. 55 trophies &mdash; 1 Platinum, 2 Gold, 6 Silver, 46 Bronze &mdash; all single-player, no online trophies in the official list.</p>
+    <div class="meter" role="progressbar" aria-label="Trophies earned">
+      <div class="fill" id="meterFill"></div>
+    </div>
+    <p class="meterText" id="meterText">0 of 55 earned</p>
+    <p class="tally" id="tally"></p>
   </div>
 </header>
 
-<nav class="views" aria-label="Views">
-  <button type="button" class="view-btn is-active" data-view="tracker">Tracker</button>
-  <button type="button" class="view-btn" data-view="roadmap">Roadmap to Platinum</button>
-  <button type="button" class="view-btn" data-view="missables">Missable trophies</button>
+<nav class="tabs" aria-label="Views">
+  <button class="tab is-active" data-tab="list">Checklist</button>
+  <button class="tab" data-tab="roadmap">Roadmap</button>
+  <button class="tab" data-tab="missables">Missables</button>
 </nav>
 
-<section class="toolbar" aria-label="Tracker controls">
-  <label class="control">Search trophies
-    <input id="searchInput" type="search" placeholder="Name, mission or keyword&hellip;" autocomplete="off">
-  </label>
-  <div class="filter-row" id="kindFilters" role="group" aria-label="Filter by kind">
-    <button type="button" class="filter-btn is-active" data-kind="all">All</button>
-    <button type="button" class="filter-btn" data-kind="story">Story</button>
-    <button type="button" class="filter-btn" data-kind="missable">Missable</button>
-    <button type="button" class="filter-btn" data-kind="collectibles">Collectibles</button>
-    <button type="button" class="filter-btn" data-kind="activities">Activities</button>
-    <button type="button" class="filter-btn" data-kind="online">Online</button>
+<section class="filters" id="filtersBar" aria-label="Filters">
+  <input id="q" type="search" placeholder="Search trophies by name or description&hellip;" aria-label="Search trophies">
+  <div class="pills" id="groupPills" role="group" aria-label="Filter by group">
+    <button class="pill is-on" data-group="all">All</button>
+    <button class="pill" data-group="story">Story</button>
+    <button class="pill" data-group="activities">Activities</button>
+    <button class="pill" data-group="collectibles">Collectibles</button>
+    <button class="pill" data-group="online">Online</button>
   </div>
-  <label class="control">Grade
-    <select id="gradeFilter">
+  <label class="ctl">Grade
+    <select id="tierSel">
       <option value="all">All grades</option>
       <option value="platinum">Platinum</option>
       <option value="gold">Gold</option>
@@ -45,50 +44,48 @@
       <option value="bronze">Bronze</option>
     </select>
   </label>
-  <label class="spoiler-check"><input id="spoilerToggle" type="checkbox"> Hide story spoilers</label>
-  <div class="save-actions">
-    <button id="exportBtn" type="button">Export progress</button>
-    <label class="import-btn">Import progress <input id="importInput" type="file" accept="application/json,.json"></label>
-    <button id="resetBtn" type="button">Reset</button>
-  </div>
-  <p class="status-line" id="filterNote"></p>
+  <label class="ctl"><input type="checkbox" id="missOnly"> Missables only</label>
+  <label class="ctl"><input type="checkbox" id="hideSpoilers"> Hide spoilers</label>
+</section>
+
+<section class="tools" id="toolsBar" aria-label="Progress tools">
+  <button id="exportBtn" type="button">Export progress</button>
+  <label class="fileBtn">Import progress <input id="importFile" type="file" accept=".json,application/json" hidden></label>
+  <button id="shareBtn" type="button">Copy share link</button>
+  <button id="resetBtn" type="button">Clear all</button>
+  <p class="hint" id="filterNote"></p>
 </section>
 
 <main>
-  <section id="trackerView" class="two-col">
-    <div class="list-col">
-      <h2 id="listHeading">Checklist</h2>
-      <ol id="trophyList" class="trophy-rows"></ol>
-      <p class="empty" id="emptyNote" hidden>No trophies match these filters.</p>
+  <section id="listView">
+    <div class="split">
+      <ul class="roster" id="roster" aria-label="Trophy list"></ul>
+      <article class="detail" id="detail" aria-live="polite"></article>
     </div>
-    <aside class="detail-col" aria-label="Selected trophy guide">
-      <div id="detailPane" class="card"></div>
-      <div class="sourcing">
-        <h3>How this guide is sourced</h3>
-        <p>Names, descriptions, grades and counts are the official PlayStation list. Each guide is written for this entry from the official description alone. The game released 19 November 2026, so no complete playthrough source exists yet for step-by-step detail, and no location or step is invented here. Where a description names no place, the guide says so.</p>
-        <p>List sources: <a href="https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/">Exophase trophy list</a> &middot; <a href="https://psnprofiles.com/trophies/43531-grand-theft-auto-vi">PSNProfiles trophy list</a></p>
-        <p class="offline-note">Offline: this page loads only its own files and makes no network request. Links above open only if you follow them.</p>
-      </div>
-    </aside>
+    <p class="empty" id="emptyNote" hidden>No trophies match these filters.</p>
   </section>
 
-  <section id="roadmapView" class="roadmap" hidden>
-    <h2 id="roadmapTitle">Road to the Platinum</h2>
-    <p id="roadmapNote" class="standfirst"></p>
-    <ol id="roadmapStages" class="stage-list"></ol>
+  <section id="roadmapView" hidden>
+    <h2 id="roadTitle"></h2>
+    <p id="roadIntro"></p>
+    <div id="phases"></div>
   </section>
 
-  <section id="missablesView" class="missables" hidden>
-    <h2>Missable trophies — 18 to watch</h2>
-    <p class="standfirst" id="missableRule"></p>
-    <ol id="missableList" class="trophy-rows"></ol>
+  <section id="missView" hidden>
+    <h2>Missables &mdash; 18 trophies, one chance each</h2>
+    <p id="missRule"></p>
+    <ul class="roster" id="missList"></ul>
   </section>
 </main>
 
 <footer>
-  <p>Leonida Platinum is an unofficial fan-made guide. Grand Theft Auto and GTA are trademarks of Take-Two Interactive; no Rockstar Games logo, artwork or game screenshot is used here. Trophy names and descriptions are shown as PlayStation publishes them.</p>
+  <p>Trophy names, descriptions and grades are the official PlayStation list, checked against
+  <a href="https://www.exophase.com/game/grand-theft-auto-vi-psn/trophies/">Exophase</a> and
+  <a href="https://psnprofiles.com/trophies/43531-grand-theft-auto-vi">PSNProfiles</a>.
+  Guide text is original writing built from those descriptions. Fan-made guide, not affiliated
+  with Rockstar Games. No Rockstar artwork is used.</p>
 </footer>
 
-<script type="module" src="js/main.js"></script>
+<script src="scripts/app.js"></script>
 </body>
 </html>
